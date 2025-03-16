@@ -6,6 +6,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
 from datetime import datetime
 import requests
+from dotenv import load_dotenv # type: ignore
+
+# Load environment variables from the .env file
+load_dotenv()
+
 
 app = Flask(__name__)
 
@@ -47,7 +52,7 @@ class Trade(db.Model):
     
 def get_stock_suggestions(query):
     """Fetch stock symbol suggestions based on the user input."""
-    api_key = os.getenv("AVL2XQV12AU3T64L")
+    api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
     url = f"https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={query}&apikey={api_key}"
     response = requests.get(url).json()
 

@@ -2,6 +2,8 @@
 __pycache__/
 *.pyc
 
+.env
+
 # Ignore virtual environment
 .venv/
 
@@ -11,3 +13,6 @@ instance/
 # Ignore other common files
 .DS_Store
 *.log
+
+#ignore flask session
+flask_session/

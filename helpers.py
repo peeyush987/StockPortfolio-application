@@ -2,6 +2,11 @@ import os
 import requests
 from functools import wraps
 from flask import render_template, session, redirect, flash
+from dotenv import load_dotenv # type: ignore
+
+# Load environment variables from the .env file
+load_dotenv()
+
 
 def apology(message, code=400):
     """Render message as an apology to user."""
@@ -37,7 +42,7 @@ def login_required(f):
 
 def lookup(symbol):
     """Lookup stock symbol using Alpha Vantage."""
-    api_key = os.getenv("AVL2XQV12AU3T64L")
+    api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
 
     if not api_key:
         flash("API Key not found. Please set ALPHA_VANTAGE_API_KEY in your environment.")
