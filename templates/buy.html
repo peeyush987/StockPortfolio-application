@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Buy
+{% endblock %}
+
+{% block main %}
+    <h1>Buy Stock</h1>
+    <form action="{{ url_for('buy') }}" method="post">
+        <div class="mb-3">
+            <label for="symbol" class="form-label">Symbol:</label>
+            <input type="text" name="symbol" id="symbol" class="form-control" required autocomplete="off">
+            <div id="suggestions" class="list-group" style="display: none;"></div>
+        </div>
+        <div class="mb-3">
+            <label for="shares" class="form-label">Shares:</label>
+            <input type="number" name="shares" id="shares" class="form-control" min="1" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Buy</button>
+    </form>
+
+    <script>
+        document.getElementById("symbol").addEventListener("input", function () {
+            var query = this.value;
+
+            if (query.length > 1) {  // Trigger after 2 characters
+                fetch(`/buy?query=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const suggestions = data.symbols;
+                        const suggestionsContainer = document.getElementById("suggestions");
+                        
+                        suggestionsContainer.innerHTML = "";
+                        if (suggestions.length > 0) {
+                            suggestionsContainer.style.display = "block";
+                            suggestions.forEach(symbol => {
+                                const div = document.createElement("div");
+                                div.classList.add("list-group-item");
+                                div.textContent = symbol;
+                                div.addEventListener("click", function () {
+                                    document.getElementById("symbol").value = symbol;
+                                    suggestionsContainer.style.display = "none";
+                                });
+                                suggestionsContainer.appendChild(div);
+                            });
+                        } else {
+                            suggestionsContainer.style.display = "none";
+                        }
+                    });
+            } else {
+                document.getElementById("suggestions").style.display = "none";
+            }
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,144 @@
+nav .navbar-brand
+{
+    font-size: xx-large;
+}
+
+nav .navbar-brand .red
+{
+    color: #ea433b;
+}
+nav .navbar-brand .green
+{
+    color: #2e944b;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fa6d;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+a:hover {
+    color: #0056b3;
+}
+
+nav.navbar {
+    background-color: #343a40;
+    padding: 10px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+nav.navbar .navbar-brand {
+    color: black;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+nav.navbar .navbar-nav .nav-link {
+    color: black;
+    padding: 10px 15px;
+    font-size: 16px;
+}
+
+nav.navbar .navbar-nav .nav-link:hover {
+    color: #d4d8dd;
+}
+
+nav.navbar .navbar-toggler {
+    background-color: #fff;
+}
+
+/* Container for Main Content */
+main.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1, h2 {
+    color: #333;
+    font-size: 2rem;
+}
+
+/* Form Styling */
+form {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 5px;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Button Styling */
+button[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    padding: 12px 25px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+/* Alert Messages */
+.alert {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.alert-primary {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Custom Register Form */
+.registerdiv {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Footer Styles */
+footer {
+    background-color: #f4f7fa;
+    padding: 20px;
+    text-align: center;
+    margin-top: 40px;
+}

@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Sell Stock
+{% endblock %}
+
+{% block main %}
+    <h2>Sell Stock</h2>
+
+    <form action="/sell" method="post">
+        <div class="mb-3">
+            <label for="symbol" class="form-label">Symbol:</label>
+            <select name="symbol" id="symbol" class="form-control" required>
+                <option value="" disabled selected>Select a stock</option>
+                {% for stock in stocks %}
+                    <option value="{{ stock.symbol }}">{{ stock.symbol }} - {{ stock.total_shares }} shares</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="shares" class="form-label">Shares:</label>
+            <input type="number" name="shares" id="shares" class="form-control" placeholder="Number of Shares" min="1" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Sell</button>
+    </form>
+
+    {% if request.method == "POST" and not success %}
+        <div class="alert alert-danger mt-3">
+            <p>Unable to sell shares. Please check your input.</p>
+        </div>
+    {% endif %}
+{% endblock %}

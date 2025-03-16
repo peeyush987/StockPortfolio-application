@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Transaction History
+{% endblock %}
+
+{% block main %}
+    <div class="container mt-4">
+        <h2>Transaction History</h2>
+
+        {% if transactions %}
+            <table class="table table-striped">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="text-start">Symbol</th>
+                        <th class="text-end">Shares</th>
+                        <th class="text-end">Price</th>
+                        <th class="text-end">Total Value</th>
+                        <th class="text-start">Date/Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                        <tr>
+                            <td>{{ transaction.symbol }}</td>
+                            <td class="text-end">{{ transaction.shares }}</td>
+                            <td class="text-end">${{ "{:.2f}".format(transaction.price)  }}</td>
+                            <td class="text-end">${{ "{:.2f}".format(transaction.shares * transaction.price) }}</td>
+                            <td class="text-start">{{ transaction.timestamp }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                No transaction history available.
+            </div>
+        {% endif %}
+
+        <a href="/" class="btn btn-secondary mt-3">Back to Portfolio</a>
+    </div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Portfolio
+{% endblock %}
+
+{% block main %}
+    <h2>Portfolio</h2>
+
+    <table class="table table-striped">
+        <thead class="thead-light">
+            <tr>
+                <th class="text-start" scope="col">Symbol</th>
+                <th class="text-start" scope="col">Name</th>
+                <th class="text-end" scope="col">Shares</th>
+                <th class="text-end" scope="col">Price</th>
+                <th class="text-end" scope="col">Total Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Loop through the stocks_info to display each stock's data -->
+            {% for stock in stocks_info %}
+                <tr>
+                    <td>{{ stock.symbol }}</td>
+                    <td>{{ stock.name }}</td>
+                    <td class="text-end">{{ stock.total_shares }}</td>
+                    <td class="text-end">${{ "{:.2f}".format(stock.price) }}</td>
+                    <td class="text-end">${{ "{:.2f}".format(stock.value) }}</td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="4" class="text-end">Cash</td>
+                <td class="text-end">{{ cash }}</td>
+            </tr>
+            <tr>
+                <td colspan="4" class="text-end">Total Value</td>
+                <td class="text-end">{{ total_value }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quote
+{% endblock %}
+
+{% block main %}
+    <h2>Get a Stock Quote</h2>
+    <form action="{{ url_for('quote') }}" method="post" class="mb-4">
+        <div class="mb-3">
+            <label for="symbol" class="form-label">Stock Symbol</label>
+            <input type="text" name="symbol" id="symbol" class="form-control" placeholder="Enter stock symbol (e.g., AAPL)" required>
+            <!-- Suggestions list -->
+            <ul id="suggestions" class="list-group mt-2" style="display: none;"></ul>
+        </div>
+        <button type="submit" class="btn btn-primary">Get Quote</button>
+    </form>
+
+    {% if quote %}
+        <div class="alert alert-info">
+            <h3>{{ quote['name'] }} ({{ quote['symbol'] }})</h3>
+            <p>Price: {{ quote['price'] | usd }}</p>
+        </div>
+    {% elif request.method == "POST" %}
+        <div class="alert alert-danger">
+            <p>Stock symbol not found. Please try again.</p>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block script %}
+    <script>
+        document.getElementById("symbol").addEventListener("input", function () {
+            var query = this.value;
+
+            if (query.length > 1) {  // Trigger after 2 characters
+                fetch(`/buy?query=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const suggestions = data.symbols;
+                        const suggestionsContainer = document.getElementById("suggestions");
+                        
+                        suggestionsContainer.innerHTML = "";
+                        if (suggestions.length > 0) {
+                            suggestionsContainer.style.display = "block";
+                            suggestions.forEach(symbol => {
+                                const div = document.createElement("div");
+                                div.classList.add("list-group-item");
+                                div.textContent = symbol;
+                                div.addEventListener("click", function () {
+                                    document.getElementById("symbol").value = symbol;
+                                    suggestionsContainer.style.display = "none";
+                                });
+                                suggestionsContainer.appendChild(div);
+                            });
+                        } else {
+                            suggestionsContainer.style.display = "none";
+                        }
+                    });
+            } else {
+                document.getElementById("suggestions").style.display = "none";
+            }
+        });
+    </script>
+{% endblock %}
