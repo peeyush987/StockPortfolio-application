@@ -27,6 +27,7 @@ This project is designed to demonstrate core web development concepts, including
 
 ## Folder Structure
 /portfolio-app
+
 │── /static
 │    └── style.css
 │── /templates
