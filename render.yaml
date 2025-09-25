@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: finance-hub-app 
+    runtime: python
+    buildCommand: "bash build.sh"
+    startCommand: "gunicorn app:app"
+    nativeEnvironment:
+      packages:
+        - libxml2-dev
+        - libxslt-dev
