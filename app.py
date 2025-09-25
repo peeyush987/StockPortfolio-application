@@ -8,10 +8,14 @@ from flask_session import Session
 from datetime import datetime
 import requests
 from dotenv import load_dotenv
+import sys # <-- ADD THIS IMPORT AT THE TOP
+
+print("--- CHECKPOINT 1: SCRIPT STARTING ---", file=sys.stderr)
 
 # Load environment variables from the .env file
 load_dotenv()
 app = Flask(__name__)
+print("--- CHECKPOINT 2: FLASK APP CREATED ---", file=sys.stderr)
 moment = Moment(app)
 app.jinja_env.filters["usd"] = usd
 
@@ -31,6 +35,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+print("--- CHECKPOINT 3: ABOUT TO CONFIGURE DB ---", file=sys.stderr)
 class User(db.Model):
     __tablename__ = 'users'
 
