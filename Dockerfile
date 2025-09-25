@@ -21,3 +21,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # The command to run your app will be set in the Render dashboard
+# Set the command to run your app
+CMD ["gunicorn", "--log-level", "debug", "app:app"]
