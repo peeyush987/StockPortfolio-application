@@ -1,19 +1,18 @@
 import os
 from flask import Flask, flash, redirect, render_template, request, session, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
-from helpers import apology, login_required, lookup, usd
+from helpers import apology, login_required, lookup, usd, get_stock_suggestions, get_finance_response, get_market_data
+from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy 
 from flask_session import Session
 from datetime import datetime
 import requests
-from dotenv import load_dotenv # type: ignore
+from dotenv import load_dotenv
 
 # Load environment variables from the .env file
 load_dotenv()
-
-
 app = Flask(__name__)
-
+moment = Moment(app)
 app.jinja_env.filters["usd"] = usd
 
 app.config["SESSION_PERMANENT"] = False
@@ -49,18 +48,6 @@ class Trade(db.Model):
 
     def __repr__(self):
         return f'<Trade {self.symbol} {self.shares} shares at {self.price}>'
-    
-def get_stock_suggestions(query):
-    """Fetch stock symbol suggestions based on the user input."""
-    api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
-    url = f"https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={query}&apikey={api_key}"
-    response = requests.get(url).json()
-
-    if "bestMatches" in response:
-        suggestions = [match['1. symbol'] for match in response['bestMatches']]
-        return suggestions
-    else:
-        return []
 
 @app.after_request
 def after_request(response):
@@ -76,7 +63,9 @@ def index():
     """Show portfolio of stocks"""
     stocks = db.session.query(
         Trade.symbol,
-        db.func.sum(Trade.shares).label('total_shares')
+
+        db.func.sum(Trade.shares).label('total_shares'),
+        db.func.avg(Trade.price).label('avg_price')
     ).filter(Trade.user_id == session["user_id"])\
      .group_by(Trade.symbol).having(db.func.sum(Trade.shares) > 0)\
      .order_by(Trade.symbol.asc()).all()
@@ -85,23 +74,58 @@ def index():
     cash = user.cash
     total_value = cash
 
+    total_cost_basis = 0
+    
     stocks_info = []  
 
     for stock in stocks:
         quote = lookup(stock.symbol)
         if quote: 
+
+            current_price = quote["price"]
+            total_shares = stock.total_shares
+            current_value = current_price * total_shares
+            
+            # Calculate cost basis (what user originally paid)
+            cost_basis = stock.avg_price * total_shares
+            total_cost_basis += cost_basis
+            
+            # Calculate gain/loss
+            gain_loss = current_value - cost_basis
+            gain_loss_percent = (gain_loss / cost_basis * 100) if cost_basis > 0 else 0
+            
             stock_info = {
                 "symbol": stock.symbol,
                 "name": quote["name"],
-                "price": quote["price"],
-                "total_shares": stock.total_shares,
-                "value": quote["price"] * stock.total_shares
+                "price": current_price,
+                "total_shares": total_shares,
+                "value": current_value,
+                "cost_basis": cost_basis,
+                "gain_loss": gain_loss,
+                "gain_loss_percent": gain_loss_percent,
+                "avg_purchase_price": stock.avg_price
             }
             stocks_info.append(stock_info)
-            total_value += stock_info["value"]
+            total_value += current_value
 
-    return render_template("index.html", stocks_info=stocks_info, cash=usd(cash), total_value=usd(total_value))
+    # Calculate overall portfolio performance
+    if total_cost_basis > 0:
+        total_gain_loss = (total_value - cash) - total_cost_basis
+        total_return_percent = (total_gain_loss / total_cost_basis * 100)
+    else:
+        total_gain_loss = 0
+        total_return_percent = 0
 
+    # Get market data for context
+    market_data = get_market_data()
+
+    return render_template("index.html", 
+                         stocks_info=stocks_info, 
+                         cash=usd(cash), 
+                         total_value=usd(total_value),
+                         total_gain_loss=total_gain_loss,
+                         total_return_percent=total_return_percent,
+                         market_data=market_data)
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
@@ -135,7 +159,8 @@ def buy():
         db.session.add(new_trade)
         db.session.commit()
 
-        flash(f"Bought { shares } shares of { symbol } for { usd(total_cost) }!")
+
+        flash(f"Successfully bought {shares} shares of {symbol} for {usd(total_cost)}!")
         return redirect("/")
 
     else:
@@ -236,6 +261,8 @@ def register():
 
         session["user_id"] = new_user.id
 
+
+        flash("Registration successful! Welcome to FinanceHub!")
         return redirect("/")
 
     else:
@@ -278,7 +305,8 @@ def sell():
         db.session.add(new_trade)
         db.session.commit()
 
-        flash("Sold!")
+
+        flash(f"Successfully sold {shares} shares of {symbol} for {usd(total_revenue)}!")
         return redirect("/")
 
     else:
@@ -291,6 +319,54 @@ def sell():
         return render_template("sell.html", stocks=stocks)
 
 
+@app.route("/chatbot", methods=["POST"])
+@login_required
+def chatbot():
+    """Handle chatbot requests"""
+    try:
+        data = request.get_json()
+        message = data.get('message', '').strip()
+        
+        if not message:
+            return jsonify({'response': 'Please ask me a question about finance!'})
+        
+        # Get AI response
+        response = get_finance_response(message)
+        
+        return jsonify({'response': response})
+    
+    except Exception as e:
+        return jsonify({'response': 'Sorry, I encountered an error. Please try again later.'})
+
+@app.route("/api/quote/<symbol>")
+@login_required
+def api_quote(symbol):
+    """Get stock quote via API endpoint"""
+    try:
+        quote = lookup(symbol.upper())
+        if quote:
+            return jsonify({
+                'symbol': quote['symbol'],
+                'name': quote['name'],
+                'price': quote['price'],
+                'success': True
+            })
+        else:
+            return jsonify({'error': 'Symbol not found', 'success': False}), 404
+    except Exception as e:
+        return jsonify({'error': 'Unable to fetch quote', 'success': False}), 500
+
+@app.route("/api/market-data")
+@login_required
+def market_data():
+    """Get market data for dashboard"""
+    try:
+        data = get_market_data()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': 'Unable to fetch market data'})
 
 if __name__ == "__main__":
-    app.run(debug=True) 
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)

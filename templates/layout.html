@@ -3,40 +3,79 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="initial-scale=1, width=device-width">
-    <meta name="description" content="C$50 Finance - Your go-to platform for stock trading and portfolio management.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Professional stock trading and portfolio management platform.">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/static/favicon.ico" rel="icon">
     <link href="/static/styles.css" rel="stylesheet">
 
-    <title>Financial buddy: {% block title %}{% endblock %}</title>
+    <title>FinanceHub: {% block title %}{% endblock %}</title>
 </head>
 
 <body>
-    <nav class="bg-light border navbar navbar-expand-md navbar-light">
+    <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">
-               <span class="green">Stock</span> <span class="red">Portfolio</span>
+                <div class="brand-icon">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+                <span>FinanceHub</span>
             </a>
-            <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbar" data-bs-toggle="collapse" type="button">
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
             <div class="collapse navbar-collapse" id="navbar">
                 {% if session["user_id"] %}
-                    <ul class="navbar-nav me-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/quote">Quote</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/buy">Buy</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/sell">Sell</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/history">History</a></li>
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">
+                                <i class="bi bi-house-door me-1"></i>Portfolio
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/quote">
+                                <i class="bi bi-search me-1"></i>Quote
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/buy">
+                                <i class="bi bi-plus-circle me-1"></i>Buy
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/sell">
+                                <i class="bi bi-dash-circle me-1"></i>Sell
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/history">
+                                <i class="bi bi-clock-history me-1"></i>History
+                            </a>
+                        </li>
                     </ul>
-                    <ul class="navbar-nav ms-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logout">
+                                <i class="bi bi-box-arrow-right me-1"></i>Logout
+                            </a>
+                        </li>
                     </ul>
                 {% else %}
-                    <ul class="navbar-nav ms-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/register">
+                                <i class="bi bi-person-plus me-1"></i>Register
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/login">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                            </a>
+                        </li>
                     </ul>
                 {% endif %}
             </div>
@@ -44,16 +83,146 @@
     </nav>
 
     {% if get_flashed_messages() %}
-        <header>
-            <div class="alert alert-primary mb-0 text-center" role="alert">
+        <div class="container-fluid mt-3">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
                 {{ get_flashed_messages() | join(" ") }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-        </header>
+        </div>
     {% endif %}
 
-    <main class="container py-5 text-center">
-        {% block main %}{% endblock %}
+    <main class="main-container">
+        <div class="content-wrapper">
+            {% block main %}{% endblock %}
+        </div>
     </main>
+
+    <!-- Finance Chatbot -->
+    {% if session["user_id"] %}
+    <div class="chatbot-container">
+        <button class="chatbot-toggle" id="chatbot-toggle">
+            <i class="bi bi-chat-dots"></i>
+        </button>
+        
+        <div class="chatbot-window" id="chatbot-window">
+            <div class="chatbot-header">
+                <span><i class="bi bi-robot me-2"></i>Finance Assistant</span>
+                <button class="chatbot-close" id="chatbot-close">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            
+            <div class="chatbot-messages" id="chatbot-messages">
+                <div class="message bot">
+                    <i class="bi bi-robot me-2"></i>
+                    Hi! I'm your finance assistant. Ask me about:
+                    <br>• Stock market basics
+                    <br>• Investment strategies  
+                    <br>• Portfolio management
+                    <br>• Financial terms
+                </div>
+            </div>
+            
+            <div class="chatbot-input">
+                <input type="text" id="chatbot-input" placeholder="Ask about finance..." />
+                <button id="chatbot-send">
+                    <i class="bi bi-send"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    <script>
+        // Chatbot functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('chatbot-toggle');
+            const window = document.getElementById('chatbot-window');
+            const close = document.getElementById('chatbot-close');
+            const input = document.getElementById('chatbot-input');
+            const send = document.getElementById('chatbot-send');
+            const messages = document.getElementById('chatbot-messages');
+
+            if (toggle && window) {
+                toggle.addEventListener('click', function() {
+                    window.classList.toggle('active');
+                });
+
+                close.addEventListener('click', function() {
+                    window.classList.remove('active');
+                });
+
+                function addMessage(content, isUser = false) {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+                    messageDiv.innerHTML = isUser ? content : `<i class="bi bi-robot me-2"></i>${content}`;
+                    messages.appendChild(messageDiv);
+                    messages.scrollTop = messages.scrollHeight;
+                }
+
+                async function sendMessage() {
+                    const message = input.value.trim();
+                    if (!message) return;
+
+                    addMessage(message, true);
+                    input.value = '';
+
+                    // Add loading indicator
+                    const loadingDiv = document.createElement('div');
+                    loadingDiv.className = 'message bot';
+                    loadingDiv.innerHTML = '<i class="bi bi-robot me-2"></i><span class="loading"></span> Thinking...';
+                    messages.appendChild(loadingDiv);
+                    messages.scrollTop = messages.scrollHeight;
+
+                    try {
+                        const response = await fetch('/chatbot', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ message: message })
+                        });
+
+                        const data = await response.json();
+                        
+                        // Remove loading indicator
+                        messages.removeChild(loadingDiv);
+                        
+                        addMessage(data.response);
+                    } catch (error) {
+                        // Remove loading indicator
+                        messages.removeChild(loadingDiv);
+                        
+                        addMessage("Sorry, I'm having trouble connecting right now. Please try again later.");
+                    }
+                }
+
+                send.addEventListener('click', sendMessage);
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            }
+        });
+
+        // Active navigation highlighting
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
 </body>
 
 </html>
