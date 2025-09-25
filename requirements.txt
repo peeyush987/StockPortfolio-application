@@ -29,4 +29,6 @@ nltk==3.8.1
 python-dateutil==2.8.2
 
 flask-moment
-
+Flask-Moment
+psycopg2-binary
+gunicorn

@@ -19,7 +19,15 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///finance.db"
+
+if os.environ.get("DATABASE_URL"):
+    uri = os.environ.get("DATABASE_URL")
+    if uri.startswith("postgres://"):
+        uri = uri.replace("postgres://", "postgresql://", 1)
+else:
+    uri = "sqlite:///finance.db"
+
+app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -366,7 +374,4 @@ def market_data():
     except Exception as e:
         return jsonify({'error': 'Unable to fetch market data'})
 
-if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
+
