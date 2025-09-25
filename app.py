@@ -27,7 +27,7 @@ if os.environ.get("DATABASE_URL"):
 else:
     uri = "sqlite:///finance.db"
 
-app.config['SQLALCHEMY_DATABASE_URL'] = uri
+app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
