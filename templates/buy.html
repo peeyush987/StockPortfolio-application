@@ -5,249 +5,257 @@
 {% endblock %}
 
 {% block main %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="bi bi-plus-circle me-2"></i>Buy Stocks
-                </h2>
-                <p class="card-subtitle">Purchase shares to add to your portfolio</p>
-            </div>
-            
-            <form action="{{ url_for('buy') }}" method="post" id="buyForm">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-4">
-                                <label for="symbol" class="form-label">Stock Symbol</label>
-                                <div class="position-relative">
-                                    <input type="text" 
-                                           name="symbol" 
-                                           id="symbol" 
-                                           class="form-control" 
-                                           placeholder="e.g., AAPL, GOOGL, TSLA"
-                                           required 
-                                           autocomplete="off"
-                                           style="text-transform: uppercase;">
-                                    <div id="suggestions" class="list-group position-absolute w-100" style="display: none; z-index: 1000;"></div>
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="bi bi-plus-circle me-2"></i>Buy Stocks
+                    </h2>
+                    <p class="card-subtitle">Purchase shares to add to your portfolio</p>
+                </div>
+                
+                <form action="{{ url_for('buy') }}" method="post" id="buyForm">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="symbol" class="form-label">Stock Symbol</label>
+                                    <div class="position-relative">
+                                        <input type="text" 
+                                               name="symbol" 
+                                               id="symbol" 
+                                               class="form-control" 
+                                               placeholder="e.g., AAPL, GOOGL, TSLA"
+                                               required 
+                                               autocomplete="off"
+                                               style="text-transform: uppercase;">
+                                        <div id="suggestions" class="list-group position-absolute w-100" style="display: none; z-index: 1000;"></div>
+                                    </div>
+                                    <div class="form-text">Enter a stock symbol or start typing to see suggestions</div>
                                 </div>
-                                <div class="form-text">Enter a stock symbol or start typing to see suggestions</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-4">
+                                    <label for="shares" class="form-label">Number of Shares</label>
+                                    <input type="number" 
+                                           name="shares" 
+                                           id="shares" 
+                                           class="form-control" 
+                                           min="1" 
+                                           placeholder="1"
+                                           required>
+                                    <div class="form-text">Minimum 1 share required</div>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
-                            <div class="mb-4">
-                                <label for="shares" class="form-label">Number of Shares</label>
-                                <input type="number" 
-                                       name="shares" 
-                                       id="shares" 
-                                       class="form-control" 
-                                       min="1" 
-                                       placeholder="1"
-                                       required>
-                                <div class="form-text">Minimum 1 share required</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Quote Display Section -->
-                    <div id="quoteDisplay" class="alert alert-info d-none">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h5 class="mb-1" id="companyName">Company Name</h5>
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-primary me-2" id="stockSymbol">SYMBOL</span>
-                                    <span class="text-muted" id="currentPrice">$0.00</span>
+                        <div id="quoteDisplay" class="alert alert-info d-none">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h5 class="mb-1" id="companyName">Company Name</h5>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-primary me-2" id="stockSymbol">SYMBOL</span>
+                                        <span class="text-muted" id="currentPrice">$0.00</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="text-muted small">Estimated Total</div>
+                                    <div class="h4 mb-0" id="estimatedTotal">$0.00</div>
                                 </div>
                             </div>
-                            <div class="col-md-4 text-end">
-                                <div class="text-muted small">Estimated Total</div>
-                                <div class="h4 mb-0" id="estimatedTotal">$0.00</div>
-                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="/" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Cancel
+                            </a>
+                            <button type="button" class="btn btn-outline-primary" id="previewBtn">
+                                <i class="bi bi-eye me-1"></i>Preview Order
+                            </button>
+                            <button type="submit" class="btn btn-success" id="buyBtn" disabled>
+                                <i class="bi bi-cart-plus me-1"></i>Buy Shares
+                            </button>
                         </div>
                     </div>
-                    
-                    <!-- Action Buttons -->
-                    <div class="d-flex gap-2 justify-content-end">
-                        <a href="/" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left me-1"></i>Cancel
-                        </a>
-                        <button type="button" class="btn btn-outline-primary" id="previewBtn">
-                            <i class="bi bi-eye me-1"></i>Preview Order
-                        </button>
-                        <button type="submit" class="btn btn-success" id="buyBtn" disabled>
-                            <i class="bi bi-cart-plus me-1"></i>Buy Shares
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        
-        <!-- Quick Actions -->
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <i class="bi bi-search text-primary" style="font-size: 2rem;"></i>
-                        <h5 class="mt-2">Research First</h5>
-                        <p class="text-muted small">Get real-time quotes and company information before buying</p>
-                        <a href="/quote" class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-search me-1"></i>Get Quote
-                        </a>
-                    </div>
-                </div>
+                </form>
             </div>
             
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <i class="bi bi-pie-chart text-success" style="font-size: 2rem;"></i>
-                        <h5 class="mt-2">View Portfolio</h5>
-                        <p class="text-muted small">Check your current holdings and available cash</p>
-                        <a href="/" class="btn btn-outline-success btn-sm">
-                            <i class="bi bi-house-door me-1"></i>Portfolio
-                        </a>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-search text-primary" style="font-size: 2rem;"></i>
+                            <h5 class="mt-2">Research First</h5>
+                            <p class="text-muted small">Get real-time quotes and company information before buying</p>
+                            <a href="/quote" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-search me-1"></i>Get Quote
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-pie-chart text-success" style="font-size: 2rem;"></i>
+                            <h5 class="mt-2">View Portfolio</h5>
+                            <p class="text-muted small">Check your current holdings and available cash</p>
+                            <a href="/" class="btn btn-outline-success btn-sm">
+                                <i class="bi bi-house-door me-1"></i>Portfolio
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const symbolInput = document.getElementById('symbol');
-    const sharesInput = document.getElementById('shares');
-    const suggestionsContainer = document.getElementById('suggestions');
-    const quoteDisplay = document.getElementById('quoteDisplay');
-    const previewBtn = document.getElementById('previewBtn');
-    const buyBtn = document.getElementById('buyBtn');
-    
-    let currentQuote = null;
-    let debounceTimer = null;
-
-    // Auto-suggest
-    symbolInput.addEventListener('input', function() {
-        const query = this.value.trim();
-        clearTimeout(debounceTimer);
-        if (query.length > 1) {
-            debounceTimer = setTimeout(() => {
-                fetch(`/buy?query=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(data => displaySuggestions(data.symbols || []))
-                    .catch(error => { 
-                        console.error('Error fetching suggestions:', error);
-                        suggestionsContainer.style.display = 'none';
-                    });
-            }, 300);
-        } else suggestionsContainer.style.display = 'none';
-    });
-
-    function displaySuggestions(symbols) {
-        suggestionsContainer.innerHTML = '';
-        if (symbols.length > 0) {
-            symbols.forEach(symbol => {
-                const item = document.createElement('button');
-                item.type = 'button';
-                item.className = 'list-group-item list-group-item-action';
-                item.textContent = symbol;
-                item.addEventListener('click', function() {
-                    symbolInput.value = symbol;
-                    suggestionsContainer.style.display = 'none';
-                    getQuote(symbol);
-                });
-                suggestionsContainer.appendChild(item);
-            });
-            suggestionsContainer.style.display = 'block';
-        } else {
-            suggestionsContainer.style.display = 'none';
-        }
-    }
-
-    document.addEventListener('click', function(e) {
-        if (!symbolInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
-            suggestionsContainer.style.display = 'none';
-        }
-    });
-
-    // Preview order
-    previewBtn.addEventListener('click', function() {
-        const symbol = symbolInput.value.trim().toUpperCase();
-        if (symbol) getQuote(symbol);
-    });
-
-    function getQuote(symbol) {
-        previewBtn.innerHTML = '<span class="loading"></span> Loading...';
-        previewBtn.disabled = true;
-
-        fetch('/quote', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'symbol=' + encodeURIComponent(symbol)
-        })
-        .then(response => response.text())
-        .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const alertInfo = doc.querySelector('.alert-info h3');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Element Selections ---
+            const symbolInput = document.getElementById('symbol');
+            const sharesInput = document.getElementById('shares');
+            const suggestionsContainer = document.getElementById('suggestions');
+            const quoteDisplay = document.getElementById('quoteDisplay');
+            const previewBtn = document.getElementById('previewBtn');
+            const buyBtn = document.getElementById('buyBtn');
             
-            if (alertInfo) {
-                const text = alertInfo.textContent;
-                const match = text.match(/(.+)\s\((.+)\)/);
-                if (match) {
-                    currentQuote = {
-                        name: match[1],
-                        symbol: match[2],
-                        price: parseFloat(match[2].replace(/[^\d.]/g,'')) || 0
-                    };
+            // --- State Variables ---
+            let currentQuote = null;
+            let debounceTimer = null;
+
+            // --- Function to Display Suggestions ---
+            function displaySuggestions(symbols) {
+                suggestionsContainer.innerHTML = '';
+                if (symbols.length > 0) {
+                    symbols.forEach(symbol => {
+                        const item = document.createElement('button');
+                        item.type = 'button';
+                        item.className = 'list-group-item list-group-item-action';
+                        item.textContent = symbol;
+                        item.addEventListener('click', function() {
+                            symbolInput.value = symbol;
+                            suggestionsContainer.style.display = 'none';
+                            getQuote(symbol); // Automatically get quote when a suggestion is clicked
+                        });
+                        suggestionsContainer.appendChild(item);
+                    });
+                    suggestionsContainer.style.display = 'block';
+                } else {
+                    suggestionsContainer.style.display = 'none';
                 }
-            } else {
-                currentQuote = { name: symbol + ' Corp', symbol: symbol, price: Math.random() * 200 + 50 };
             }
-        })
-        .catch(error => {
-            console.error('Error fetching quote:', error);
-            currentQuote = { name: symbol + ' Corp', symbol: symbol, price: Math.random() * 200 + 50 };
-        })
-        .finally(() => {
-            previewBtn.innerHTML = '<i class="bi bi-eye me-1"></i>Preview Order';
-            previewBtn.disabled = false;
-            if (currentQuote) {
-                displayQuote();
-                updateEstimate();
+            
+            // --- Function to Fetch Quote ---
+            function getQuote(symbol) {
+                if (!symbol) return;
+
+                previewBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+                previewBtn.disabled = true;
+                buyBtn.disabled = true; // Disable buy button while fetching
+                
+                // It's much better to fetch from a JSON API directly if available
+                fetch(`/api/quote/${symbol}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Stock not found');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Handle successful API response
+                        if (data.price) {
+                            currentQuote = {
+                                symbol: data.symbol || symbol,
+                                name: data.name || 'N/A',
+                                price: parseFloat(data.price)
+                            };
+                            displayQuote();
+                            updateEstimate();
+                        } else {
+                            throw new Error('Invalid data received');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching quote:', error);
+                        alert(`Could not retrieve quote for ${symbol}. Please check the symbol and try again.`);
+                        quoteDisplay.classList.add('d-none'); // Hide stale quote info
+                        currentQuote = null;
+                    })
+                    .finally(() => {
+                        // Always reset the button state
+                        previewBtn.innerHTML = '<i class="bi bi-eye me-1"></i>Preview Order';
+                        previewBtn.disabled = false;
+                    });
             }
+
+            // --- Function to Display Quote on Page ---
+            function displayQuote() {
+                if (currentQuote) {
+                    document.getElementById('stockSymbol').textContent = currentQuote.symbol;
+                    document.getElementById('companyName').textContent = currentQuote.name;
+                    document.getElementById('currentPrice').textContent = `$${currentQuote.price.toFixed(2)}`;
+                    quoteDisplay.classList.remove('d-none');
+                    buyBtn.disabled = false; // Enable buy button only when quote is available
+                }
+            }
+
+            // --- Function to Update Estimated Total ---
+            function updateEstimate() {
+                const shares = parseInt(sharesInput.value) || 0;
+                if (currentQuote && shares > 0) {
+                    const total = currentQuote.price * shares;
+                    document.getElementById('estimatedTotal').textContent = `$${total.toFixed(2)}`;
+                } else {
+                    document.getElementById('estimatedTotal').textContent = `$0.00`;
+                }
+            }
+
+            // --- Event Listeners ---
+
+            // Auto-suggest functionality with debouncing
+            symbolInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                const query = this.value.trim();
+                if (query.length > 1) {
+                    debounceTimer = setTimeout(() => {
+                        fetch(`/buy?query=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => displaySuggestions(data.symbols || []))
+                            .catch(error => console.error('Error fetching suggestions:', error));
+                    }, 300); // Wait 300ms after user stops typing
+                } else {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+
+            // Hide suggestions when clicking elsewhere
+            document.addEventListener('click', function(e) {
+                if (!symbolInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+
+            // Preview order button
+            previewBtn.addEventListener('click', function() {
+                getQuote(symbolInput.value.trim().toUpperCase());
+            });
+
+            // Update estimate when shares input changes
+            sharesInput.addEventListener('input', updateEstimate);
+
+            // Simple form validation on submit
+            document.getElementById('buyForm').addEventListener('submit', function(e) {
+                const symbol = symbolInput.value.trim();
+                const shares = parseInt(sharesInput.value);
+                
+                if (!symbol || !shares || shares < 1 || !currentQuote) {
+                    e.preventDefault();
+                    alert('Please get a valid quote and enter a number of shares before buying.');
+                }
+            });
         });
-    }
-
-    function displayQuote() {
-        if (currentQuote) {
-            document.getElementById('stockSymbol').textContent = currentQuote.symbol;
-            document.getElementById('companyName').textContent = currentQuote.name;
-            document.getElementById('currentPrice').textContent = `$${currentQuote.price.toFixed(2)}`;
-            quoteDisplay.classList.remove('d-none');
-            buyBtn.disabled = false;
-        }
-    }
-
-    function updateEstimate() {
-        const shares = parseInt(sharesInput.value) || 0;
-        if (currentQuote && shares > 0) {
-            const total = currentQuote.price * shares;
-            document.getElementById('estimatedTotal').textContent = `$${total.toFixed(2)}`;
-        }
-    }
-
-    sharesInput.addEventListener('input', updateEstimate);
-
-    document.getElementById('buyForm').addEventListener('submit', function(e) {
-        const symbol = symbolInput.value.trim();
-        const shares = parseInt(sharesInput.value);
-        if (!symbol || shares < 1) {
-            e.preventDefault();
-            alert('Please enter a valid stock symbol and number of shares.');
-        }
-    });
-});
-</script>
+    </script>
 {% endblock %}

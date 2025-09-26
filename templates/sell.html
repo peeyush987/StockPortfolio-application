@@ -1,34 +1,256 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Sell Stock
+    Sell Stocks
 {% endblock %}
 
 {% block main %}
-    <h2>Sell Stock</h2>
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="bi bi-dash-circle me-2"></i>Sell Stocks
+                    </h2>
+                    <p class="card-subtitle">Liquidate positions from your portfolio</p>
+                </div>
+                
+                {% if stocks %}
+                    <form action="/sell" method="post" id="sellForm">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <label for="symbol" class="form-label">Stock to Sell</label>
+                                        <select name="symbol" id="symbol" class="form-select" required>
+                                            <option value="" disabled selected>Select a stock from your portfolio</option>
+                                            {% for stock in stocks %}
+                                                <option value="{{ stock.symbol }}" 
+                                                        data-shares="{{ stock.total_shares }}"
+                                                        data-symbol="{{ stock.symbol }}">
+                                                    {{ stock.symbol }} - {{ stock.total_shares }} shares available
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="form-text">Choose from your current holdings</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <label for="shares" class="form-label">Shares to Sell</label>
+                                        <input type="number" 
+                                               name="shares" 
+                                               id="shares" 
+                                               class="form-control" 
+                                               min="1" 
+                                               placeholder="Enter quantity"
+                                               required>
+                                        <div class="form-text" id="sharesHelp">Select a stock first</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="positionDisplay" class="alert alert-secondary d-none">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5 class="mb-1" id="positionCompany">Company Name</h5>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-primary me-2" id="positionSymbol">SYMBOL</span>
+                                            <span class="text-muted">Current Price: <span id="currentPrice">$0.00</span></span>
+                                        </div>
+                                        <div class="mt-1">
+                                            <small class="text-muted">
+                                                You own: <span id="sharesOwned">0</span> shares
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <div class="text-muted small">Estimated Proceeds</div>
+                                        <div class="h4 mb-0 text-success" id="estimatedProceeds">$0.00</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-2 justify-content-end">
+                                <a href="/" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-danger" id="sellBtn" disabled>
+                                    <i class="bi bi-dash-circle me-1"></i>Sell Shares
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="card-footer bg-light">
+                        <h6 class="mb-3">
+                            <i class="bi bi-briefcase me-1"></i>Your Current Holdings
+                        </h6>
+                        <div class="row">
+                            {% for stock in stocks %}
+                                <div class="col-md-4 mb-2">
+                                    <div class="d-flex justify-content-between align-items-center p-2 bg-white rounded border">
+                                        <div>
+                                            <strong>{{ stock.symbol }}</strong>
+                                            <div class="text-muted small">{{ stock.total_shares }} shares</div>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary quick-select-btn" 
+                                                data-symbol="{{ stock.symbol }}">
+                                            Select
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                {% else %}
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-inbox" style="font-size: 3rem; color: var(--text-muted);"></i>
+                        <h4 class="mt-3">No Holdings to Sell</h4>
+                        <p class="text-muted mb-4">You don't have any stocks in your portfolio to sell.</p>
+                        <div class="d-flex gap-2 justify-content-center">
+                            <a href="/buy" class="btn btn-success">
+                                <i class="bi bi-plus-circle me-1"></i>Buy Stocks First
+                            </a>
+                            <a href="/" class="btn btn-secondary">
+                                <i class="bi bi-house-door me-1"></i>View Portfolio
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+             </div>
+    </div>
 
-    <form action="/sell" method="post">
-        <div class="mb-3">
-            <label for="symbol" class="form-label">Symbol:</label>
-            <select name="symbol" id="symbol" class="form-control" required>
-                <option value="" disabled selected>Select a stock</option>
-                {% for stock in stocks %}
-                    <option value="{{ stock.symbol }}">{{ stock.symbol }} - {{ stock.total_shares }} shares</option>
-                {% endfor %}
-            </select>
-        </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const symbolSelect = document.getElementById('symbol');
+            const sharesInput = document.getElementById('shares');
+            const sharesHelp = document.getElementById('sharesHelp');
+            const positionDisplay = document.getElementById('positionDisplay');
+            const sellBtn = document.getElementById('sellBtn');
+            const sellForm = document.getElementById('sellForm');
+            
+            let currentQuote = null;
+            let maxShares = 0;
 
-        <div class="mb-3">
-            <label for="shares" class="form-label">Shares:</label>
-            <input type="number" name="shares" id="shares" class="form-control" placeholder="Number of Shares" min="1" required>
-        </div>
+            // Handle stock selection from dropdown
+            symbolSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (!selectedOption.value) {
+                    positionDisplay.classList.add('d-none');
+                    sellBtn.disabled = true;
+                    sharesInput.value = '';
+                    sharesHelp.textContent = 'Select a stock first';
+                    return;
+                }
+                
+                const symbol = selectedOption.getAttribute('data-symbol');
+                maxShares = parseInt(selectedOption.getAttribute('data-shares'));
+                
+                sharesInput.max = maxShares;
+                sharesInput.value = ''; // Reset shares input
+                sharesHelp.textContent = `Maximum ${maxShares} shares available`;
+                sharesHelp.className = 'form-text';
+                
+                getCurrentQuote(symbol);
+            });
 
-        <button type="submit" class="btn btn-primary">Sell</button>
-    </form>
+            // Handle shares input
+            sharesInput.addEventListener('input', function() {
+                // Ensure maxShares is set before validating
+                if (maxShares === 0) return;
+                
+                const shares = parseInt(this.value);
+                
+                if (shares > maxShares) {
+                    this.value = maxShares;
+                    sharesHelp.textContent = `Maximum ${maxShares} shares available`;
+                    sharesHelp.className = 'form-text text-danger';
+                } else if (shares > 0) {
+                    sharesHelp.textContent = `Selling ${shares} of ${maxShares} available`;
+                    sharesHelp.className = 'form-text text-success';
+                } else {
+                    sharesHelp.textContent = `Maximum ${maxShares} shares available`;
+                    sharesHelp.className = 'form-text';
+                }
+                
+                updateEstimate();
+                // Enable sell button if shares are valid
+                sellBtn.disabled = !currentQuote || !shares || shares <= 0 || shares > maxShares;
+            });
 
-    {% if request.method == "POST" and not success %}
-        <div class="alert alert-danger mt-3">
-            <p>Unable to sell shares. Please check your input.</p>
-        </div>
-    {% endif %}
+            // Get current stock quote from API
+            function getCurrentQuote(symbol) {
+                // Clear old data and show loading state if desired
+                positionDisplay.classList.add('d-none');
+                
+                fetch(`/api/quote/${symbol}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(data => {
+                        currentQuote = data; // Assumes API returns { symbol, name, price }
+                        displayPosition();
+                        updateEstimate();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching quote:', error);
+                        alert('Could not fetch the current price. Please try again later.');
+                    });
+            }
+
+            // Display the fetched position info
+            function displayPosition() {
+                if (currentQuote) {
+                    document.getElementById('positionSymbol').textContent = currentQuote.symbol;
+                    document.getElementById('positionCompany').textContent = currentQuote.name;
+                    document.getElementById('currentPrice').textContent = `$${currentQuote.price.toFixed(2)}`;
+                    document.getElementById('sharesOwned').textContent = maxShares;
+                    positionDisplay.classList.remove('d-none');
+                }
+            }
+
+            // Update the estimated proceeds display
+            function updateEstimate() {
+                const shares = parseInt(sharesInput.value) || 0;
+                const proceedsEl = document.getElementById('estimatedProceeds');
+                if (currentQuote && shares > 0 && shares <= maxShares) {
+                    const proceeds = currentQuote.price * shares;
+                    proceedsEl.textContent = `$${proceeds.toFixed(2)}`;
+                } else {
+                    proceedsEl.textContent = '$0.00';
+                }
+            }
+            
+            // Helper function to trigger selection
+            function selectStock(symbol) {
+                symbolSelect.value = symbol;
+                // Trigger the 'change' event manually to run the listener
+                symbolSelect.dispatchEvent(new Event('change'));
+                sharesInput.focus(); // Move cursor to shares input for better UX
+            }
+            
+            // [CHANGE] Add event listener for all quick-select buttons
+            document.querySelectorAll('.quick-select-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const symbol = this.getAttribute('data-symbol');
+                    selectStock(symbol);
+                });
+            });
+
+            // Final form validation before submitting
+            sellForm.addEventListener('submit', function(e) {
+                const shares = parseInt(sharesInput.value);
+                if (!symbolSelect.value || !shares || shares <= 0 || shares > maxShares) {
+                    e.preventDefault();
+                    alert('Please select a stock and enter a valid number of shares to sell.');
+                }
+            });
+        });
+    </script>
 {% endblock %}
