@@ -15,68 +15,78 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
+    <div class="app-backdrop"></div>
+    <nav class="navbar navbar-expand-lg app-navbar">
+        <div class="container-fluid app-nav-shell">
             <a class="navbar-brand" href="{{ url_for('portfolio.index') }}">
                 <div class="brand-icon">
-                    <i class="bi bi-graph-up"></i>
+                    <i class="bi bi-graph-up-arrow"></i>
                 </div>
-                <span>FinanceHub</span>
+                <div class="brand-copy">
+                    <span class="brand-wordmark">FinanceHub</span>
+                    <span class="brand-subline">Markets workspace</span>
+                </div>
             </a>
-            
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbar">
                 {% if session.get("user_id") %}
-                    <ul class="navbar-nav me-auto">
+                    <ul class="navbar-nav me-auto app-nav-links">
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('portfolio.index') }}">
-                                <i class="bi bi-house-door me-1"></i>Portfolio
+                                <i class="bi bi-house-door"></i>
+                                <span>Portfolio</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('portfolio.quote') }}">
-                                <i class="bi bi-search me-1"></i>Quote
+                                <i class="bi bi-search"></i>
+                                <span>Research</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('portfolio.buy') }}">
-                                <i class="bi bi-plus-circle me-1"></i>Buy
+                                <i class="bi bi-plus-circle"></i>
+                                <span>Buy</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('portfolio.sell') }}">
-                                <i class="bi bi-dash-circle me-1"></i>Sell
+                                <i class="bi bi-dash-circle"></i>
+                                <span>Sell</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('portfolio.history') }}">
-                                <i class="bi bi-clock-history me-1"></i>History
+                                <i class="bi bi-clock-history"></i>
+                                <span>History</span>
                             </a>
                         </li>
                     </ul>
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.logout') }}">
-                                <i class="bi bi-box-arrow-right me-1"></i>Logout
-                            </a>
-                        </li>
-                    </ul>
+                    <div class="app-nav-actions ms-auto">
+                        <div class="nav-status-pill">
+                            <span class="nav-status-dot"></span>
+                            <span>Trading workspace</span>
+                        </div>
+                        <a class="nav-logout-link" href="{{ url_for('auth.logout') }}">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
                 {% else %}
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.register') }}">
-                                <i class="bi bi-person-plus me-1"></i>Register
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.login') }}">
-                                <i class="bi bi-box-arrow-in-right me-1"></i>Login
-                            </a>
-                        </li>
-                    </ul>
+                    <div class="app-nav-actions ms-auto">
+                        <a class="nav-ghost-link" href="{{ url_for('auth.register') }}">
+                            <i class="bi bi-person-plus"></i>
+                            <span>Register</span>
+                        </a>
+                        <a class="nav-cta-link" href="{{ url_for('auth.login') }}">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            <span>Login</span>
+                        </a>
+                    </div>
                 {% endif %}
             </div>
         </div>
@@ -135,6 +145,7 @@
     {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" crossorigin="anonymous"></script>
     
     <script>
         // Chatbot functionality
@@ -158,7 +169,12 @@
                 function addMessage(content, isUser = false) {
                     const messageDiv = document.createElement('div');
                     messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
-                    messageDiv.innerHTML = isUser ? content : `<i class="bi bi-robot me-2"></i>${content}`;
+                    const formatted = String(content)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/\n/g, '<br>');
+                    messageDiv.innerHTML = isUser ? formatted : `<i class="bi bi-robot me-2"></i>${formatted}`;
                     messages.appendChild(messageDiv);
                     messages.scrollTop = messages.scrollHeight;
                 }
@@ -169,6 +185,8 @@
 
                     addMessage(message, true);
                     input.value = '';
+                    send.disabled = true;
+                    input.disabled = true;
 
                     // Add loading indicator
                     const loadingDiv = document.createElement('div');
@@ -186,17 +204,25 @@
                             body: JSON.stringify({ message: message })
                         });
 
+                        if (!response.ok) {
+                            throw new Error(`Request failed with status ${response.status}`);
+                        }
+
                         const data = await response.json();
                         
                         // Remove loading indicator
                         messages.removeChild(loadingDiv);
                         
-                        addMessage(data.response);
+                        addMessage(data.response || "I couldn't come up with a helpful answer just now. Try asking in a more specific way.");
                     } catch (error) {
                         // Remove loading indicator
                         messages.removeChild(loadingDiv);
                         
                         addMessage("Sorry, I'm having trouble connecting right now. Please try again later.");
+                    } finally {
+                        send.disabled = false;
+                        input.disabled = false;
+                        input.focus();
                     }
                 }
 

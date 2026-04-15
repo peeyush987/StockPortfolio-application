@@ -1,8 +1,8 @@
 import os
 import logging
 
-from dotenv import load_dotenv
-from flask import Flask
+from dotenv import load_dotenv # type: ignore
+from flask import Flask # type: ignore
 
 from api.routes import api_bp
 from auth.routes import auth_bp
@@ -10,19 +10,6 @@ from extensions import db, migrate, moment, sess
 from helpers import usd
 from models import Portfolio, Trade, User
 from portfolio.routes import portfolio_bp
-
-
-load_dotenv()
-
-
-def require_env(name):
-    value = os.getenv(name)
-    if not value:
-        raise RuntimeError(
-            f"Missing required environment variable: {name}. "
-            "Set it in your deployment environment or local .env file."
-        )
-    return value
 
 
 logging.basicConfig(
@@ -33,10 +20,12 @@ logger = logging.getLogger(__name__)
 
 logger.info("Application startup initiated")
 
+load_dotenv()
+
 
 def create_app():
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = require_env("SECRET_KEY")
+    app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
     logger.info("Flask app created")
 
     app.config["SESSION_PERMANENT"] = False

@@ -1,6 +1,9 @@
 from flask import Blueprint, jsonify, request
+from flask import session
 
+from extensions import db
 from helpers import get_finance_response, get_market_data, login_required, lookup
+from models import Portfolio, User, ensure_portfolios_populated
 
 
 api_bp = Blueprint("api", __name__)
@@ -17,7 +20,35 @@ def chatbot():
         if not message:
             return jsonify({"response": "Please ask me a question about finance!"})
 
-        response = get_finance_response(message)
+        ensure_portfolios_populated(session["user_id"])
+        user = User.query.get(session["user_id"])
+        holdings = Portfolio.query.filter_by(user_id=session["user_id"]).order_by(Portfolio.symbol.asc()).all()
+        market_data = get_market_data()
+
+        positions = []
+        invested_value = 0
+        for holding in holdings:
+            positions.append(
+                {
+                    "symbol": holding.symbol,
+                    "shares": holding.shares,
+                    "cost_basis": holding.total_cost_basis,
+                    "value": holding.total_cost_basis,
+                }
+            )
+            invested_value += holding.total_cost_basis
+
+        portfolio_context = {
+            "cash": user.cash if user else 0,
+            "total_value": (user.cash if user else 0) + invested_value,
+            "positions": positions,
+        }
+
+        response = get_finance_response(
+            message,
+            portfolio_context=portfolio_context,
+            market_context=market_data,
+        )
         return jsonify({"response": response})
     except Exception:
         return jsonify({"response": "Sorry, I encountered an error. Please try again later."})

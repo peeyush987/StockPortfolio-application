@@ -47,6 +47,7 @@ def index():
                 "gain_loss": gain_loss,
                 "gain_loss_percent": gain_loss_percent,
                 "avg_purchase_price": stock.avg_purchase_price,
+                "allocation_percent": 0,
             }
         )
         total_value += current_value
@@ -59,15 +60,37 @@ def index():
         total_return_percent = 0
 
     market_data = get_market_data()
+    invested_value = max(total_value - cash, 0)
+
+    stocks_info.sort(key=lambda item: item["value"], reverse=True)
+    for stock_info in stocks_info:
+        stock_info["allocation_percent"] = (stock_info["value"] / total_value * 100) if total_value > 0 else 0
+
+    best_position = max(stocks_info, key=lambda item: item["gain_loss_percent"], default=None)
+    worst_position = min(stocks_info, key=lambda item: item["gain_loss_percent"], default=None)
+    profitable_positions = len([item for item in stocks_info if item["gain_loss"] > 0])
+    cash_ratio = (cash / total_value * 100) if total_value > 0 else 0
+    invested_ratio = (invested_value / total_value * 100) if total_value > 0 else 0
+    market_items = list(market_data.items())
 
     return render_template(
         "index.html",
         stocks_info=stocks_info,
         cash=usd(cash),
+        cash_value=cash,
         total_value=usd(total_value),
+        total_value_number=total_value,
+        invested_value=usd(invested_value),
+        invested_value_number=invested_value,
         total_gain_loss=total_gain_loss,
         total_return_percent=total_return_percent,
+        profitable_positions=profitable_positions,
+        cash_ratio=cash_ratio,
+        invested_ratio=invested_ratio,
+        best_position=best_position,
+        worst_position=worst_position,
         market_data=market_data,
+        market_items=market_items,
     )
 
 
