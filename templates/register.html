@@ -5,24 +5,175 @@
 {% endblock %}
 
 {% block main %}
-    {% if error %}
-        <div class="alert alert-danger">
-            {{ error }}
-        </div>
-    {% endif %}
-    <div class = "registerdiv ">
-        <form action="{{ url_for('auth.register') }}" method="post">
-            <div class="form-group">
-                <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text" required>
-            </div>
-            <div class="form-group">
-                <input class="form-control" name="password" placeholder="Password" type="password" required>
-            </div>
-            <div class="form-group">
-                <input class="form-control" name="confirmation" placeholder="Password (again)" type="password" required>
-            </div>
-            <button class="btn btn-primary" type="submit">Register</button>
-        </form>
-    </div>
+    <section class="auth-shell">
+        <div class="auth-showcase">
+            <div class="auth-badge">Smart onboarding for serious investors</div>
+            <h1 class="auth-hero-title">Create your FinanceHub account.</h1>
+            <p class="auth-hero-copy">
+                Track positions, research equities, and build a portfolio workflow that feels as polished as the apps people trust every day.
+            </p>
 
+            <div class="auth-feature-grid">
+                <article class="auth-feature-card">
+                    <div class="auth-feature-icon"><i class="bi bi-shield-check"></i></div>
+                    <div>
+                        <h2>Protected by stronger credentials</h2>
+                        <p>Your password must be at least 8 characters and include upper, lower, numeric, and special characters.</p>
+                    </div>
+                </article>
+                <article class="auth-feature-card">
+                    <div class="auth-feature-icon"><i class="bi bi-lightning-charge"></i></div>
+                    <div>
+                        <h2>Fast portfolio workflows</h2>
+                        <p>Buy, sell, quote, and review performance with a focused interface built for repeat use.</p>
+                    </div>
+                </article>
+                <article class="auth-feature-card">
+                    <div class="auth-feature-icon"><i class="bi bi-google"></i></div>
+                    <div>
+                        <h2>Google sign-up ready</h2>
+                        <p>Use your Google account for a quicker onboarding flow once your OAuth credentials are configured.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div class="auth-panel register-panel">
+            <div class="auth-panel-header">
+                <div class="auth-overline">New account</div>
+                <h2 class="auth-panel-title">Join FinanceHub</h2>
+                <p class="auth-panel-copy">Set up your account with a strong password or continue with Google.</p>
+            </div>
+
+            {% if error %}
+                <div class="auth-alert auth-alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>{{ error }}</span>
+                </div>
+            {% endif %}
+
+            <a
+                class="auth-social-button {% if not google_oauth_enabled %}disabled{% endif %}"
+                href="{% if google_oauth_enabled %}{{ url_for('auth.google_register') }}{% else %}#{% endif %}"
+                {% if not google_oauth_enabled %}aria-disabled="true"{% endif %}
+            >
+                <span class="auth-social-mark">G</span>
+                <span>{{ "Continue with Google" if google_oauth_enabled else "Google sign-up not configured yet" }}</span>
+            </a>
+
+            <div class="auth-divider">
+                <span>or create an account manually</span>
+            </div>
+
+            <form action="{{ url_for('auth.register') }}" method="post" class="auth-form" novalidate>
+                <div class="auth-field">
+                    <label for="username">Username</label>
+                    <input
+                        autocomplete="username"
+                        autofocus
+                        class="form-control auth-input"
+                        id="username"
+                        name="username"
+                        placeholder="Choose a username"
+                        type="text"
+                        value="{{ form_data.username }}"
+                        required
+                    >
+                </div>
+
+                <div class="auth-field">
+                    <label for="password">Password</label>
+                    <input
+                        autocomplete="new-password"
+                        class="form-control auth-input"
+                        id="password"
+                        name="password"
+                        placeholder="Create a strong password"
+                        type="password"
+                        minlength="8"
+                        required
+                    >
+                    <div class="auth-hint">{{ password_requirements }}</div>
+                </div>
+
+                <div class="auth-field">
+                    <label for="confirmation">Confirm Password</label>
+                    <input
+                        autocomplete="new-password"
+                        class="form-control auth-input"
+                        id="confirmation"
+                        name="confirmation"
+                        placeholder="Re-enter your password"
+                        type="password"
+                        minlength="8"
+                        required
+                    >
+                </div>
+
+                <div class="password-checklist" id="passwordChecklist">
+                    <div class="password-rule" data-rule="length">At least 8 characters</div>
+                    <div class="password-rule" data-rule="upper">One uppercase letter</div>
+                    <div class="password-rule" data-rule="lower">One lowercase letter</div>
+                    <div class="password-rule" data-rule="number">One number</div>
+                    <div class="password-rule" data-rule="special">One special character</div>
+                </div>
+
+                <button class="btn btn-primary auth-submit" type="submit">
+                    <i class="bi bi-person-plus"></i>
+                    <span>Create account</span>
+                </button>
+            </form>
+
+            <p class="auth-footer-copy">
+                Already have an account?
+                <a href="{{ url_for('auth.login') }}">Sign in</a>
+            </p>
+        </div>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const confirmationInput = document.getElementById('confirmation');
+            const checklist = {
+                length: value => value.length >= 8,
+                upper: value => /[A-Z]/.test(value),
+                lower: value => /[a-z]/.test(value),
+                number: value => /\d/.test(value),
+                special: value => /[^A-Za-z0-9]/.test(value),
+            };
+
+            function updateChecklist() {
+                const value = passwordInput.value;
+                Object.entries(checklist).forEach(([rule, validator]) => {
+                    const item = document.querySelector(`[data-rule="${rule}"]`);
+                    if (!item) return;
+                    item.classList.toggle('met', validator(value));
+                });
+            }
+
+            function syncConfirmationValidity() {
+                if (!confirmationInput.value) {
+                    confirmationInput.setCustomValidity('');
+                    return;
+                }
+
+                if (confirmationInput.value !== passwordInput.value) {
+                    confirmationInput.setCustomValidity('Passwords must match.');
+                } else {
+                    confirmationInput.setCustomValidity('');
+                }
+            }
+
+            passwordInput.addEventListener('input', function() {
+                updateChecklist();
+                syncConfirmationValidity();
+            });
+
+            confirmationInput.addEventListener('input', syncConfirmationValidity);
+            updateChecklist();
+        });
+    </script>
 {% endblock %}
