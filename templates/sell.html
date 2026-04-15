@@ -25,10 +25,10 @@
                                         <select name="symbol" id="symbol" class="form-select" required>
                                             <option value="" disabled selected>Select a stock from your portfolio</option>
                                             {% for stock in stocks %}
-                                                <option value="{{ stock.symbol }}" 
-                                                        data-shares="{{ stock.total_shares }}"
+                                            <option value="{{ stock.symbol }}" 
+                                                        data-shares="{{ stock.shares }}"
                                                         data-symbol="{{ stock.symbol }}">
-                                                    {{ stock.symbol }} - {{ stock.total_shares }} shares available
+                                                    {{ stock.symbol }} - {{ stock.shares }} shares available
                                                 </option>
                                             {% endfor %}
                                         </select>
@@ -93,7 +93,7 @@
                                     <div class="d-flex justify-content-between align-items-center p-2 bg-white rounded border">
                                         <div>
                                             <strong>{{ stock.symbol }}</strong>
-                                            <div class="text-muted small">{{ stock.total_shares }} shares</div>
+                                            <div class="text-muted small">{{ stock.shares }} shares</div>
                                         </div>
                                         <button class="btn btn-sm btn-outline-primary quick-select-btn" 
                                                 data-symbol="{{ stock.symbol }}">

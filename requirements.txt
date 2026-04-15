@@ -5,7 +5,9 @@ Werkzeug==2.3.7
 
 # Database & ORM
 Flask-SQLAlchemy==3.0.5
+Flask-Migrate==4.0.7
 SQLAlchemy==2.0.23
+alembic==1.13.2
 
 # Session Management
 Flask-Session==0.5.0

@@ -11,7 +11,7 @@
         </div>
     {% endif %}
     <div class = "registerdiv ">
-        <form action="{{ url_for('register') }}" method="post">
+        <form action="{{ url_for('auth.register') }}" method="post">
             <div class="form-group">
                 <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text" required>
             </div>

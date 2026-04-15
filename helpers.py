@@ -1,4 +1,5 @@
 import os
+import logging
 import requests
 from functools import wraps
 from flask import render_template, session, redirect, flash
@@ -8,6 +9,7 @@ import json
 
 # Load environment variables from the .env file
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 
 def apology(message, code=400):
@@ -64,8 +66,8 @@ def lookup(symbol):
                     "name": profile_response.get("name", symbol.upper()),
                     "price": float(price_response["c"])
                 }
-        except Exception as e:
-            print(f"Finnhub API error: {e}")
+        except Exception:
+            logger.exception("Finnhub API lookup failed for symbol %s", symbol)
 
     # Try Alpha Vantage API as fallback
     alpha_vantage_key = os.getenv("ALPHA_VANTAGE_API_KEY")
@@ -83,8 +85,8 @@ def lookup(symbol):
                     "name": symbol.upper(),  # Alpha Vantage doesn't provide company name in this endpoint
                     "price": price
                 }
-        except Exception as e:
-            print(f"Alpha Vantage API error: {e}")
+        except Exception:
+            logger.exception("Alpha Vantage lookup failed for symbol %s", symbol)
     
     # Try Yahoo Finance alternative (via yfinance-like API)
     try:
@@ -105,8 +107,8 @@ def lookup(symbol):
                 "name": name,
                 "price": float(price)
             }
-    except Exception as e:
-        print(f"Yahoo Finance API error: {e}")
+    except Exception:
+        logger.exception("Yahoo Finance lookup failed for symbol %s", symbol)
 
     # If all APIs fail, return None
     flash(f"Unable to fetch data for symbol {symbol}. Please try again later.")
@@ -127,8 +129,8 @@ def get_stock_suggestions(query):
             if response.get("result"):
                 suggestions = [item["symbol"] for item in response["result"][:10]]
                 return suggestions
-        except Exception as e:
-            print(f"Finnhub search error: {e}")
+        except Exception:
+            logger.exception("Finnhub symbol search failed for query %s", query)
     
     # Try Alpha Vantage as fallback
     alpha_vantage_key = os.getenv("ALPHA_VANTAGE_API_KEY")
@@ -140,8 +142,8 @@ def get_stock_suggestions(query):
             if "bestMatches" in response:
                 suggestions = [match['1. symbol'] for match in response['bestMatches'][:10]]
                 return suggestions
-        except Exception as e:
-            print(f"Alpha Vantage search error: {e}")
+        except Exception:
+            logger.exception("Alpha Vantage symbol search failed for query %s", query)
     
     return suggestions
 
@@ -184,8 +186,8 @@ Response (keep it under 150 words):"""
             if response.status_code == 200:
                 return response.json()["choices"][0]["message"]["content"]
                 
-        except Exception as e:
-            print(f"Groq API error: {e}")
+        except Exception:
+            logger.exception("Groq finance response generation failed")
     
     # Fallback to predefined responses for common questions
     message_lower = message.lower()
