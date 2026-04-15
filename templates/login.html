@@ -5,21 +5,105 @@
 {% endblock %}
 
 {% block main %}
-    <h2>Log In</h2>
-    <form action="{{ url_for('auth.login') }}" method="post" class="w-50 mx-auto">
-        <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input id="username" autocomplete="off" autofocus class="form-control" name="username" placeholder="Enter your username" type="text" required>
+    <section class="auth-shell auth-shell-login">
+        <div class="auth-showcase auth-showcase-login">
+            <div class="auth-badge">Institution-grade experience, simple daily workflow</div>
+            <h1 class="auth-hero-title">Welcome back to your portfolio desk.</h1>
+            <p class="auth-hero-copy">
+                Pick up where you left off with fast market lookups, a clearer holdings view, and a smoother path back into your account.
+            </p>
+
+            <div class="auth-feature-grid">
+                <article class="auth-feature-card">
+                    <div class="auth-feature-icon"><i class="bi bi-speedometer2"></i></div>
+                    <div>
+                        <h2>Open your dashboard faster</h2>
+                        <p>Jump directly into quotes, buy and sell workflows, and portfolio snapshots without extra friction.</p>
+                    </div>
+                </article>
+                <article class="auth-feature-card">
+                    <div class="auth-feature-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div>
+                        <h2>Stay on top of positions</h2>
+                        <p>Track holdings, review performance, and monitor what changed since your last session.</p>
+                    </div>
+                </article>
+                <article class="auth-feature-card">
+                    <div class="auth-feature-icon"><i class="bi bi-shield-lock"></i></div>
+                    <div>
+                        <h2>Secure sign-in flow</h2>
+                        <p>Use your account credentials now, with Google sign-in available whenever OAuth keys are configured.</p>
+                    </div>
+                </article>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input id="password" class="form-control" name="password" placeholder="Enter your password" type="password" required>
+
+        <div class="auth-panel login-panel">
+            <div class="auth-panel-header">
+                <div class="auth-overline">Account access</div>
+                <h2 class="auth-panel-title">Sign in to FinanceHub</h2>
+                <p class="auth-panel-copy">Access your account with your username and password.</p>
+            </div>
+
+            {% if error %}
+                <div class="auth-alert auth-alert-danger">
+                    <i class="bi bi-exclamation-octagon-fill"></i>
+                    <span>{{ error }}</span>
+                </div>
+            {% endif %}
+
+            <a
+                class="auth-social-button {% if not google_oauth_enabled %}disabled{% endif %}"
+                href="{% if google_oauth_enabled %}{{ url_for('auth.google_register') }}{% else %}#{% endif %}"
+                {% if not google_oauth_enabled %}aria-disabled="true"{% endif %}
+            >
+                <span class="auth-social-mark">G</span>
+                <span>{{ "Continue with Google" if google_oauth_enabled else "Google sign-in not configured yet" }}</span>
+            </a>
+
+            <div class="auth-divider">
+                <span>or continue with your FinanceHub account</span>
+            </div>
+
+            <form action="{{ url_for('auth.login') }}" method="post" class="auth-form" novalidate>
+                <div class="auth-field">
+                    <label for="username">Username</label>
+                    <input
+                        id="username"
+                        autocomplete="username"
+                        autofocus
+                        class="form-control auth-input"
+                        name="username"
+                        placeholder="Enter your username"
+                        type="text"
+                        value="{{ form_data.username }}"
+                        required
+                    >
+                </div>
+
+                <div class="auth-field">
+                    <label for="password">Password</label>
+                    <input
+                        id="password"
+                        autocomplete="current-password"
+                        class="form-control auth-input"
+                        name="password"
+                        placeholder="Enter your password"
+                        type="password"
+                        required
+                    >
+                </div>
+
+                <button class="btn btn-primary auth-submit" type="submit">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Log in</span>
+                </button>
+            </form>
+
+            <p class="auth-footer-copy">
+                New to FinanceHub?
+                <a href="{{ url_for('auth.register') }}">Create an account</a>
+            </p>
         </div>
-        <button class="btn btn-primary" type="submit">Log In</button>
-    </form>
-    {% if message %}
-        <div class="alert alert-danger mt-3" role="alert">
-            {{ message }}
-        </div>
-    {% endif %}
+    </section>
 {% endblock %}

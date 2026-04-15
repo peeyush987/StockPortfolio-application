@@ -47,26 +47,38 @@ def build_register_context(error=None):
     }
 
 
+def build_login_context(error=None):
+    return {
+        "error": error,
+        "google_oauth_enabled": google_oauth_enabled(),
+        "form_data": {
+            "username": request.form.get("username", "").strip(),
+        },
+    }
+
+
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
     session.clear()
 
     if request.method == "POST":
-        if not request.form.get("username"):
-            return apology("must provide username", 403)
-        if not request.form.get("password"):
-            return apology("must provide password", 403)
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        if not username:
+            return render_template("login.html", **build_login_context("Please enter your username."))
+        if not password:
+            return render_template("login.html", **build_login_context("Please enter your password."))
 
-        user = User.query.filter_by(username=request.form.get("username")).first()
+        user = User.query.filter_by(username=username).first()
 
-        if user is None or not check_password_hash(user.hash, request.form.get("password")):
-            return apology("invalid username and/or password", 403)
+        if user is None or not check_password_hash(user.hash, password):
+            return render_template("login.html", **build_login_context("Invalid username or password."))
 
         session["user_id"] = user.id
         return redirect("/")
 
-    return render_template("login.html")
+    return render_template("login.html", **build_login_context())
 
 
 @auth_bp.route("/logout")
